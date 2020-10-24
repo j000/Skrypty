@@ -1,3 +1,15 @@
+# Jarosław Rymut, 2020
+####################
+
+invalid_option() {
+	echo "Invalid option ${1-provided}" 1>&2
+	exit 1
+}
+
+log() {
+	echo "$@" >&8
+}
+
 index() {
 	# log "index(${1-0}, ${2-0})"
 	tmp=$((${2-0} * ${width-0} + ${1-0}))
@@ -58,7 +70,6 @@ place_mine(){
 }
 
 print_map() {
-	echo
 	echo -n "  "
 	for x in $(seq $width); do
 		echo -n " $x "
