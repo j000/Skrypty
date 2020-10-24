@@ -2,7 +2,7 @@
 # Jarosław Rymut, 2020
 ####################
 
-if [[ "${BASH_VERSINFO}" -lt 4 ]]; then
+if (( ${BASH_VERSINFO} < 4 )); then
 	echo "Sorry, you need at least bash 4 to run this script." >&2
 	exit 1
 fi
@@ -55,21 +55,21 @@ while getopts -- ":-:hvqr:m:s:" opt; do
 done
 shift $((OPTIND - 1))
 
-if [[ $quiet -ne 0 ]]; then
+if (( $quiet != 0 )); then
 	exec 9>&1 # save output
 	# exec 1>&9 9>&- # restore stdout
 	exec >/dev/null
 fi
 
-if [[ $verbose -eq 0 ]]; then
+if (( $verbose == 0 )); then
 	exec 8<>/dev/null
 else
 	exec 8>&1
 fi
 
-width=$(limit $width 2 99)
-height=$(limit $height 2 99)
-mines=$(limit $mines 1 $(($width * $height - 1)))
+(( width = $(limit $width 2 99) ))
+(( height = $(limit $height 2 99) ))
+(( mines = $(limit $mines 1 $(($width * $height - 1))) ))
 
 log "Size: ${width}x$height"
 log "Mines: $mines"
@@ -82,15 +82,17 @@ log "Quiet: $quiet"
 on_exit() {
 	log "Restoring cursor on exit"
 	printf '\033[?25h'
+	stty echo
 }
 trap on_exit EXIT
 log "Hiding cursor"
 printf '\033[?25l'
+stty -echo
 
 ####################
 
-map=()
-revealed=()
+declare -A map
+declare -A revealed
 for i in $(seq 1 $mines); do
 	log "Placing mine $i"
 	place_mine
@@ -117,26 +119,27 @@ do
 
 	case "$key" in
 		$'\e[A'|$'\e0A') # up
-			cursor_y=$(max 1 $((cursor_y - 1)))
+			(( cursor_y > 1 )) || continue
+			(( cursor_y-- ))
 			;;
 		$'\e[B'|$'\e0B') # down
-			cursor_y=$(min $height $((cursor_y + 1)))
+			(( cursor_y < height )) || continue
+			(( cursor_y++ ))
 			;;
 		$'\e[C'|$'\e0C') # right
-			cursor_x=$(min $height $((cursor_x + 1)))
+			(( cursor_x < width )) || continue
+			(( cursor_x++ ))
 			;;
 		$'\e[D'|$'\e0D') # left
-			cursor_x=$(max 1 $((cursor_x - 1)))
+			(( cursor_x > 1 )) || continue
+			(( cursor_x-- ))
 			;;
 		' ') # space
 			revealed[$(index $cursor_x $cursor_y)]=1
 			;;
-		q|$'\n'|$'\e') # q, enter
+		'q'|$'\n'|$'\e') # q, enter
 			echo "Goodbye!"
 			exit 0
-			;;
-		*)
-			log ">>$key<<"
 			;;
 	esac
 

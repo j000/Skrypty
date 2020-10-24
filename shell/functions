@@ -11,34 +11,37 @@ log() {
 }
 
 random() {
-	[[ $# -eq 0 ]] && return $RANDOM
+	(( $# == 0 )) && return $RANDOM
 	tmp=$RANDOM
-	cutoff=$((32767 % $1))
-	while [[ $tmp -le $cutoff ]]; do
+	(( cutoff = 32767 % $1 ))
+	while (( $tmp <= $cutoff )); do
 		tmp=$RANDOM
 	done
 	return $((1 + $tmp % $1))
 }
 
 max() {
-	[[ $# -ne 2 ]] && return 1
+	(( $# != 2 )) && return 1
 	echo $(( $1 > $2 ? $1 : $2 ))
 }
 
 min() {
-	[[ $# -ne 2 ]] && return 1
+	(( $# != 2 )) && return 1
 	echo $(( $1 < $2 ? $1 : $2 ))
 }
 
 limit() {
-	[[ $# -ne 3 ]] && return 1
+	(( $# != 3 )) && return 1
 	echo $(min $(max $1 $2) $3)
 }
 
 ####################
 
 change_char() {
-	[[ $# -eq 0 ]] && echo " "
+	if (( $# == 0 )); then
+		echo " "
+		return
+	fi
 	case $1 in
 		' ') printf "\u2591";;
 		-1) echo 'M';;
@@ -47,7 +50,7 @@ change_char() {
 }
 
 clear() {
-	[[ $verbose -ne 0 ]] && return
+	(( verbose )) && return
 	printf "\e[2J\e[H"
 }
 
@@ -61,12 +64,12 @@ print_map() {
 		printf "%2d " $y
 		for x in $(seq $width); do
 			ind=$(index $x $y)
-			if [[ $cursor_x -eq $x && $cursor_y -eq $y ]]; then
+			if (( $cursor_x == $x && $cursor_y == $y )); then
 				printf ">"
 			else
 				printf " "
 			fi
-			if [[ ${revealed[$(index $x $y)]-0} -eq 1 ]]; then
+			if (( ${revealed[$(index $x $y)]-0} == 1 )); then
 				printf "%s " "$(change_char ${map[$ind]- })"
 			else
 				printf "%s " "$(change_char ' ')"
@@ -89,11 +92,11 @@ place_mine(){
 		random $height
 		y=$?
 		ind=$(index $x $y)
-		[[ ${map[$ind]:=0} -eq -1 ]]
+		(( ${map[$ind]:=0} == -1 ))
 	do :; done
 
 	log "Mine is on $x $y ($ind)"
-	map[$ind]=-1
+	(( map[$ind] = -1 ))
 
 	for dy in -1 0 1; do
 		for dx in -1 0 1; do
@@ -104,7 +107,7 @@ place_mine(){
 			[[ $y -eq $height && $dy -eq 1 ]] && continue
 			tmp=$(index $(($x + $dx)) $(($y + $dy)))
 			[[ ${map[$tmp]-0} -eq -1 ]] && continue
-			map[$tmp]=$((${map[$tmp]-0} + 1))
+			(( map[$tmp] = ${map[$tmp]-0} + 1 ))
 		done
 	done
 }
