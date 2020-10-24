@@ -35,19 +35,19 @@ mines=10
 
 while getopts -- ":-:hvqr:m:s:" opt; do
 	case ${opt} in
-		q ) quiet=1 ;;
-		v ) verbose=1 ;;
-		r ) RANDOM=$OPTARG ;;
-		m ) mines=$OPTARG ;;
-		s ) width=$OPTARG; height=$OPTARG ;;
-		\? ) invalid_option "-$OPTARG" ;;
-		h ) usage ;;
-		: ) echo "Invalid option: -$OPTARG requires an argument" 1>&2 ;;
-		- ) # long variants
+		q) quiet=1 ;;
+		v) verbose=1 ;;
+		r) RANDOM=$OPTARG ;;
+		m) mines=$OPTARG ;;
+		s) width=$OPTARG; height=$OPTARG ;;
+		\?) invalid_option "-$OPTARG" ;;
+		h) usage ;;
+		:) echo "Invalid option: -$OPTARG requires an argument" 1>&2 ;;
+		-) # long variants
 			case "$OPTARG" in
-				help ) usage ;;
-				quiet ) quiet=1 ;;
-				verbose ) verbose=1 ;;
+				help) usage ;;
+				quiet) quiet=1 ;;
+				verbose) verbose=1 ;;
 				*) invalid_option "--$OPTARG" ;;
 			esac
 			;;
@@ -67,9 +67,15 @@ else
 	exec 8>&1
 fi
 
-width=$(max $width 2)
-height=$(max $height 2)
+width=$(limit $width 2 99)
+height=$(limit $height 2 99)
 mines=$(limit $mines 1 $(($width * $height - 1)))
+
+log "Size: ${width}x$height"
+log "Mines: $mines"
+log "Options: $@"
+log "Verbose: $verbose"
+log "Quiet: $quiet"
 
 ####################
 

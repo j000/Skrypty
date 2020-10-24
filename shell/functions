@@ -50,8 +50,7 @@ change_char() {
 ####################
 
 index() {
-	tmp=$((${2-0} * ${width-0} + ${1-0}))
-	return $tmp
+	echo $((${2-0} * ${width-0} + ${1-0}))
 }
 
 place_mine(){
@@ -60,10 +59,9 @@ place_mine(){
 		x=$?
 		random $height
 		y=$?
-		index $x $y
-		ind=$?
+		ind=$(index $x $y)
 		[[ ${map[$ind]:=0} -eq -1 ]]
-	do :;done
+	do :; done
 
 	log "Mine is on $x $y ($ind)"
 	map[$ind]=-1
@@ -75,8 +73,7 @@ place_mine(){
 			[[ $x -eq $width && $dx -eq 1 ]] && continue
 			[[ $y -eq 1 && $dy -eq -1 ]] && continue
 			[[ $y -eq $height && $dy -eq 1 ]] && continue
-			index $(($x + $dx)) $(($y + $dy))
-			tmp=$?
+			tmp=$(index $(($x + $dx)) $(($y + $dy)))
 			[[ ${map[$tmp]-0} -eq -1 ]] && continue
 			map[$tmp]=$((${map[$tmp]-0} + 1))
 		done
@@ -92,8 +89,7 @@ print_map() {
 	for y in $(seq $height); do
 		echo -n "$y "
 		for x in $(seq $width); do
-			index $x $y
-			ind=$?
+			ind=$(index $x $y)
 			echo -n " $(change_char ${map[$ind]- }) "
 		done
 		echo
