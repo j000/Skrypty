@@ -66,6 +66,8 @@ else
 	exec 8>&1
 fi
 
+mines=$(limit $mines 1 $(($width * $height - 1)))
+
 ####################
 
 on_exit() {

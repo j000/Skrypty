@@ -26,6 +26,21 @@ random() {
 	return $((1 + $tmp % $1))
 }
 
+max() {
+	[[ $# -ne 2 ]] && return 1
+	echo $(( $1 > $2 ? $1 : $2 ))
+}
+
+min() {
+	[[ $# -ne 2 ]] && return 1
+	echo $(( $1 < $2 ? $1 : $2 ))
+}
+
+limit() {
+	[[ $# -ne 3 ]] && return 1
+	echo $(min $(max $1 $2) $3)
+}
+
 ####################
 
 change_char() {
