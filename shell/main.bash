@@ -90,6 +90,7 @@ printf '\033[?25l'
 ####################
 
 map=()
+revealed=()
 for i in $(seq 1 $mines); do
 	log "Placing mine $i"
 	place_mine
@@ -101,8 +102,44 @@ done
 # echo -e "GET /?format=3 HTTP/1.1\r\nhost: wttr.in\r\nConnection: close\r\n\r\n" >&3
 # cat <&3
 
-log "Options: $@"
-log "Verbose: $verbose"
-log "Quiet: $quiet"
+cursor_x=1
+cursor_y=1
 
+clear
 print_map
+while read -rsN1 key
+do
+	# read other bits, with 2ms delay
+	read -rsN1 -t 0.002 k1
+	read -rsN1 -t 0.002 k2
+	read -rsN1 -t 0.002 k3
+	key+=${k1}${k2}${k3}
+
+	case "$key" in
+		$'\e[A'|$'\e0A') # up
+			cursor_y=$(max 1 $((cursor_y - 1)))
+			;;
+		$'\e[B'|$'\e0B') # down
+			cursor_y=$(min $height $((cursor_y + 1)))
+			;;
+		$'\e[C'|$'\e0C') # right
+			cursor_x=$(min $height $((cursor_x + 1)))
+			;;
+		$'\e[D'|$'\e0D') # left
+			cursor_x=$(max 1 $((cursor_x - 1)))
+			;;
+		' ') # space
+			revealed[$(index $cursor_x $cursor_y)]=1
+			;;
+		q|$'\n'|$'\e') # q, enter
+			echo "Goodbye!"
+			exit 0
+			;;
+		*)
+			log ">>$key<<"
+			;;
+	esac
+
+	clear
+	print_map
+done

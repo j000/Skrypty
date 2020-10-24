@@ -40,11 +40,40 @@ limit() {
 change_char() {
 	[[ $# -eq 0 ]] && echo " "
 	case $1 in
-		-1 )
-			echo 'M';;
-		* )
-			echo $1;;
+		' ') printf "\u2591";;
+		-1) echo 'M';;
+		*) echo "$1";;
 	esac
+}
+
+clear() {
+	[[ $verbose -ne 0 ]] && return
+	printf "\e[2J\e[H"
+}
+
+print_map() {
+	printf "   "
+	for x in $(seq $width); do
+		printf "%2d " $x
+	done
+	echo
+	for y in $(seq $height); do
+		printf "%2d " $y
+		for x in $(seq $width); do
+			ind=$(index $x $y)
+			if [[ $cursor_x -eq $x && $cursor_y -eq $y ]]; then
+				printf ">"
+			else
+				printf " "
+			fi
+			if [[ ${revealed[$(index $x $y)]-0} -eq 1 ]]; then
+				printf "%s " "$(change_char ${map[$ind]- })"
+			else
+				printf "%s " "$(change_char ' ')"
+			fi
+		done
+		echo
+	done
 }
 
 ####################
@@ -77,21 +106,5 @@ place_mine(){
 			[[ ${map[$tmp]-0} -eq -1 ]] && continue
 			map[$tmp]=$((${map[$tmp]-0} + 1))
 		done
-	done
-}
-
-print_map() {
-	echo -n "  "
-	for x in $(seq $width); do
-		echo -n " $x "
-	done
-	echo
-	for y in $(seq $height); do
-		echo -n "$y "
-		for x in $(seq $width); do
-			ind=$(index $x $y)
-			echo -n " $(change_char ${map[$ind]- }) "
-		done
-		echo
 	done
 }
