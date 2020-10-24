@@ -109,40 +109,45 @@ cursor_y=1
 
 clear
 print_map
+printf "\e[s"
 while read -rsN1 key
 do
 	# read other bits, with 2ms delay
-	read -rsN1 -t 0.002 k1
-	read -rsN1 -t 0.002 k2
-	read -rsN1 -t 0.002 k3
-	key+=${k1}${k2}${k3}
+	read -rsN1 -t 0.0001 k1
+	read -rsN1 -t 0.0001 k2
+	key+=${k1}${k2}
 
 	case "$key" in
 		$'\e[A'|$'\e0A') # up
 			(( cursor_y > 1 )) || continue
+			printf "\e[$((1 + ${cursor_y}));$((1 + 3 * ${cursor_x}))H \e[1C \e[1A\e[3D>\e[1C<"
 			(( cursor_y-- ))
 			;;
 		$'\e[B'|$'\e0B') # down
 			(( cursor_y < height )) || continue
+			printf "\e[$((1 + ${cursor_y}));$((1 + 3 * ${cursor_x}))H \e[1C \e[1B\e[3D>\e[1C<"
 			(( cursor_y++ ))
 			;;
 		$'\e[C'|$'\e0C') # right
 			(( cursor_x < width )) || continue
+			printf "\e[$((1 + ${cursor_y}));$((1 + 3 * ${cursor_x}))H \e[1C >\e[1C<"
 			(( cursor_x++ ))
 			;;
 		$'\e[D'|$'\e0D') # left
 			(( cursor_x > 1 )) || continue
+			printf "\e[$((1 + ${cursor_y}));$((1 + 3 * ${cursor_x}))H \e[1C \e[6D>\e[1C<"
 			(( cursor_x-- ))
 			;;
 		' ') # space
 			revealed[$(index $cursor_x $cursor_y)]=1
+			clear
+			print_map
 			;;
 		'q'|$'\n'|$'\e') # q, enter
+			printf "\e[u"
 			echo "Goodbye!"
 			exit 0
 			;;
 	esac
-
-	clear
-	print_map
 done
+printf "\e[u"

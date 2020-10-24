@@ -70,9 +70,14 @@ print_map() {
 				printf " "
 			fi
 			if (( ${revealed[$(index $x $y)]-0} == 1 )); then
-				printf "%s " "$(change_char ${map[$ind]- })"
+				printf "%s" "$(change_char ${map[$ind]- })"
 			else
-				printf "%s " "$(change_char ' ')"
+				printf "%s" "$(change_char ' ')"
+			fi
+			if (( $cursor_x == $x && $cursor_y == $y )); then
+				printf "<"
+			else
+				printf " "
 			fi
 		done
 		echo
