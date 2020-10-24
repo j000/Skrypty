@@ -96,7 +96,7 @@ echo -ne '\033[?25l'
 
 ####################
 
-. ./functons.bash
+. ./functions
 map=()
 for i in $(seq 1 $mines); do
 	log "Placing mine $i"
