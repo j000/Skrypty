@@ -33,12 +33,13 @@ mines=10
 
 ####################
 
-while getopts -- ":-:hvqr:m:" opt; do
+while getopts -- ":-:hvqr:m:s:" opt; do
 	case ${opt} in
 		q ) quiet=1 ;;
 		v ) verbose=1 ;;
 		r ) RANDOM=$OPTARG ;;
 		m ) mines=$OPTARG ;;
+		s ) width=$OPTARG; height=$OPTARG ;;
 		\? ) invalid_option "-$OPTARG" ;;
 		h ) usage ;;
 		: ) echo "Invalid option: -$OPTARG requires an argument" 1>&2 ;;
@@ -66,6 +67,8 @@ else
 	exec 8>&1
 fi
 
+width=$(max $width 2)
+height=$(max $height 2)
 mines=$(limit $mines 1 $(($width * $height - 1)))
 
 ####################
