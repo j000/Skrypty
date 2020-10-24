@@ -10,12 +10,6 @@ log() {
 	echo "$@" >&8
 }
 
-index() {
-	# log "index(${1-0}, ${2-0})"
-	tmp=$((${2-0} * ${width-0} + ${1-0}))
-	return $tmp
-}
-
 random() {
 	[[ $# -eq 0 ]] && return $RANDOM
 	tmp=$RANDOM
@@ -54,6 +48,11 @@ change_char() {
 }
 
 ####################
+
+index() {
+	tmp=$((${2-0} * ${width-0} + ${1-0}))
+	return $tmp
+}
 
 place_mine(){
 	while
