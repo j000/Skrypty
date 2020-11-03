@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Jarosław Rymut, 2020
 ####################
+# vim: ft=sh:ts=4:sw=4:tw=80:noet
 
 if (( ${BASH_VERSINFO} < 4 )); then
 	echo "Sorry, you need at least bash 4 to run this script." >&2
@@ -81,12 +82,12 @@ log "Quiet: $quiet"
 
 on_exit() {
 	log "Restoring cursor on exit"
-	printf '\033[?25h'
+	echo -ne '\e[?25h'
 	stty echo
 }
 trap on_exit EXIT
 log "Hiding cursor"
-printf '\033[?25l'
+echo -ne '\e[?25l'
 stty -echo
 
 ####################
@@ -112,7 +113,7 @@ print_map
 printf "\e[s"
 while read -rsN1 key
 do
-	# read other bits, with 2ms delay
+	# read other bits
 	read -rsN1 -t 0.0001 k1
 	read -rsN1 -t 0.0001 k2
 	key+=${k1}${k2}
