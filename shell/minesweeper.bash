@@ -39,6 +39,19 @@ invalid_option() {
 	exit 1
 }
 
+missing_argument() {
+	echo "$1 wymaga podania wartości"
+	echo
+	usage
+	exit 1
+}
+
+check_number() {
+	[[ $1 == ?(-)+([0-9]) ]] && return
+	echo "\"$1\" nie jest liczbą"
+	exit 1
+}
+
 ####################
 
 random() {
@@ -119,12 +132,12 @@ print_char() {
 	ind=$1.$2
 	case ${revealed[$ind]-0} in
 		0)
-		echo -en '\e[30;47m # \e[0m'
-		return
-		;;
-	2)
-		echo -en '\e[30;46m F \e[0m'
-		return
+			echo -en '\e[30;47m # \e[0m'
+			return
+			;;
+		2)
+			echo -en '\e[30;46m F \e[0m'
+			return
 	esac
 
 	m=${map[$ind]-0}
@@ -223,15 +236,25 @@ mines=10
 while getopts -- ":-:hdm:s:r:" opt; do
 	case ${opt} in
 		d) debug=1 ;;
-		m) mines=$OPTARG ;;
-		s) width=$OPTARG; height=$OPTARG ;;
-		r) RANDOM=$OPTARG ;;
+		m)
+			check_number $OPTARG
+			mines=$OPTARG
+			;;
+		s)
+			check_number $OPTARG
+			width=$OPTARG
+			height=$OPTARG
+			;;
+		r)
+			check_number $OPTARG
+			RANDOM=$OPTARG
+			;;
 		\?) invalid_option "-$OPTARG" ;;
 		h)
 			usage
 			exit 0
 			;;
-		:) invalid_option "-$OPTARG wymaga argumentu" ;;
+		:) missing_argument "-$OPTARG" ;;
 		-) # long variants
 			case "$OPTARG" in
 				help)
@@ -265,12 +288,10 @@ log "Options: $*"
 
 on_exit() {
 	echo -ne '\e[?25h'
-	stty echo
 }
 
 trap on_exit EXIT
 echo -ne '\e[?25l'
-stty -echo
 
 ####################
 
