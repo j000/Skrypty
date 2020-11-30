@@ -9,28 +9,28 @@ if (( ${BASH_VERSINFO-5} < 4 )); then
 fi
 
 usage() {
-	cat <<- EOT
-	Saper
+	cat << EOT
+Saper
 
-	Gra polega na odkrywaniu na planszy poszczególnych pól w taki sposób,
-	aby nie natrafić na minę. Na każdym z odkrytych pól napisana jest liczba min,
-	które bezpośrednio stykają się z danym polem (od zera do ośmiu). Jeśli
-	oznaczymy dane pole flagą, jest ono zabezpieczone przed odsłonięciem,
-	dzięki czemu przez przypadek nie odsłonimy miny. Gra kończy się po okryciu
-	pola z miną bądź po okryciu wszystkich pól bez min.
+Gra polega na odkrywaniu na planszy poszczególnych pól w taki sposób,
+aby nie natrafić na minę. Na każdym z odkrytych pól napisana jest liczba min,
+które bezpośrednio stykają się z danym polem (od zera do ośmiu). Jeśli
+oznaczymy dane pole flagą, jest ono zabezpieczone przed odsłonięciem,
+dzięki czemu przez przypadek nie odsłonimy miny. Gra kończy się po okryciu
+pola z miną bądź po okryciu wszystkich pól bez min.
 
-	Obsługa:
-		ESC, q: wyjście
-		Enter, f: flaga
-		Spacja: odsłonięcie
+Obsługa:
+	ESC, q: wyjście
+	Enter, f: flaga
+	Spacja: odsłonięcie
 
-	Obsługiwane argumenty:
-		-h, --help	wyświetl tą pomoc i wyjdź
-		-s INT		ustawia rozmiar planszy
-		-m INT		ustawia ilość min
+Obsługiwane argumenty:
+	-h, --help	wyświetl tą pomoc i wyjdź
+	-s INT		ustawia rozmiar planszy
+	-m INT		ustawia ilość min
 
-	Jarosław Rymut, 2020
-	EOT
+Jarosław Rymut, 2020
+EOT
 }
 
 invalid_option() {

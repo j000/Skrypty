@@ -13,15 +13,15 @@ oznaczymy dane pole flagą, jest ono zabezpieczone przed odsłonięciem,
 dzięki czemu przez przypadek nie odsłonimy miny. Gra kończy się po okryciu
 pola z miną bądź po okryciu wszystkich pól bez min.
 
-Obsługa:
-ESC, q: wyjście
-Enter, f: flaga
-Spacja: odsłonięcie
+Obsługa:  
+	ESC, q: wyjście  
+	Enter, f: flaga  
+	Spacja: odsłonięcie  
 
-Obsługiwane argumenty:
-  -h, --help      wyświetl tą pomoc i wyjdź
-  -s INT          ustawia rozmiar planszy
-  -m INT          ustawia ilość min
+Obsługiwane argumenty:  
+  -h, --help      wyświetl tą pomoc i wyjdź  
+  -s INT          ustawia rozmiar planszy  
+  -m INT          ustawia ilość min  
 
 ### Perl
 
@@ -40,12 +40,12 @@ https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/
 
 Do działania wymaga NumPy i MatPlotLib.
 
-Obsługiwane argumenty:
-  -h, --help            pokaż tę wiadomość i wyjdź
-  --size N              rozmiar symulacji
-  --deltat F, --dt F, -t F
-                        delta t - zmiana czasu na krok symulacji
-  --diffusion F, --diff F
-                        współczynnik dyfuzji
-  --viscosity F, --visc F
-                        współczynnik dyfuzji
+Obsługiwane argumenty:  
+  -h, --help            pokaż tę wiadomość i wyjdź  
+  --size N              rozmiar symulacji  
+  --deltat F, --dt F, -t F  
+                        delta t - zmiana czasu na krok symulacji  
+  --diffusion F, --diff F  
+                        współczynnik dyfuzji  
+  --viscosity F, --visc F  
+                        współczynnik dyfuzji  
