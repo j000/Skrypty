@@ -6,9 +6,6 @@
 
 import math
 import sys
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 def clamp(x, low, high):
     if x < low:
@@ -104,14 +101,6 @@ def dens_step(x, x0, u, v, diff):
     advect(0, x, x0, u, v)
 
 
-def usage():
-    print('''
-    Symulacja płynów.
-
-    Jarosław Rymut, 2020
-    ''')
-
-
 def convertArgparseMessages(s):
     trans = {
         'usage: ': 'użycie: ',
@@ -139,8 +128,14 @@ if __name__ == '__main__':
         description='''
 Symulacja płynów
 
-Symulacja płynów na siatce.
+Symulacja płynów oparta o siatkę.
 https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
+
+Do działania program wymaga NumPy i MatPlotLib:
+apt-get install python3-matplotlib
+albo:
+pip install numpy
+pip install matplotlib
 ''',
         epilog='Jarosław Rymut, 2020'
     )
@@ -153,6 +148,10 @@ https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/
     parser.add_argument('--viscosity', '--visc', metavar='F', type=float, default=0.000001, dest='visc',
         help='współczynnik dyfuzji')
     args = parser.parse_args()
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
 
     N = args.size
     dt = args.dt
@@ -216,3 +215,7 @@ https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/
 
     x = animation.FuncAnimation(fig, animate, interval=200, blit=False)
     plt.show()
+else:
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
