@@ -11,33 +11,13 @@ INIT {
 	binmode STDIN, ":encoding(UTF-8)";
 }
 
-my %missing;
-BEGIN {
-	push(@INC, ".");
-    push(@INC, sub {
-        my ($code, $mod) = @_;
-		return if ($mod =~ /Encode/);
-        $mod =~ s#/#::#g;
-        $mod =~ s/\.pm$//;
-        $missing{$mod}++;
-        open(my $fh, '+>', undef);
-        print {$fh} "package $mod;1;";
-        seek($fh, 0, 0);
-        return $fh;
-    });
-}
-INIT {
-    if (my @list = keys %missing) {
-		warn "Program do dzialania wymaga następujących modułów: @list\n";
-        exit 1;
-    }
-}
-
 if (@ARGV) {
 	print(<<"USAGE");
 Docelowo ładny efekt z użyciem cząsteczek
 
 Użycie: $0
+
+Do działania skrypt wymaga PDL. Najprościej: apt install pdl
 
 Jarosław Rymut, 2020
 USAGE
@@ -46,6 +26,7 @@ USAGE
 
 use PDL;
 
+use lib ".";
 use Particle;
 use Scene;
 use ConsoleRenderer;
