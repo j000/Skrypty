@@ -124,6 +124,7 @@ if __name__ == '__main__':
     gettext.gettext = convertArgparseMessages
     import argparse
     parser = argparse.ArgumentParser(
+        prog=sys.argv[0],
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
 Symulacja płynów
