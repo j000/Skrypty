@@ -12,7 +12,7 @@ package Scene;
 sub new {
 	my $class = shift;
 	my $renderer = shift;
-	Carp::confess "Not a renderer"
+	Carp::confess("Not a renderer")
 		if not $renderer->can("frame")
 			or not $renderer->can("draw");
 	return bless {
@@ -32,14 +32,14 @@ use overload q/""/ => sub {
 sub add_emiter {
 	my $self = shift;
 	my $emiter = shift;
-	Carp::confess "Not an emitter: $emiter" if not $emiter->can("emit");
+	Carp::confess("Not an emitter: $emiter") if not $emiter->can("emit");
 	push @{$self->{emiters}}, $emiter;
 }
 
 sub add_force {
 	my $self = shift;
 	my $force = shift;
-	Carp::confess "Not a force: $force" if not $force->can("apply");
+	Carp::confess("Not a force: $force") if not $force->can("apply");
 	push @{$self->{forces}}, $force;
 }
 
