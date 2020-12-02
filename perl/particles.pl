@@ -26,7 +26,8 @@ USAGE
 
 use PDL;
 
-use lib ".";
+use File::Basename;
+use lib dirname (__FILE__);
 use Particle;
 use Scene;
 use ConsoleRenderer;
