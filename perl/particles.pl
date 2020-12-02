@@ -5,15 +5,14 @@ use v5.30;
 use warnings;
 use utf8;
 
-INIT {
+BEGIN {
 	binmode STDOUT, ":encoding(UTF-8)";
 	binmode STDERR, ":encoding(UTF-8)";
 	binmode STDIN, ":encoding(UTF-8)";
-}
 
-if (@ARGV) {
-	print(<<"USAGE");
-Docelowo ładny efekt z użyciem cząsteczek
+	if (@ARGV) {
+		print(<<"USAGE");
+Docelowo prosta animacja zachowania cząsteczek.
 
 Użycie: $0
 
@@ -21,7 +20,8 @@ Do działania skrypt wymaga PDL. Najprościej: apt install pdl
 
 Jarosław Rymut, 2020
 USAGE
-	exit(1);
+		exit(1);
+	}
 }
 
 use PDL;
