@@ -9,14 +9,18 @@ BEGIN {
 	binmode STDOUT, ":encoding(UTF-8)";
 	binmode STDERR, ":encoding(UTF-8)";
 	binmode STDIN, ":encoding(UTF-8)";
+}
 
+BEGIN {
 	if (@ARGV) {
 		print(<<"USAGE");
 Docelowo prosta animacja zachowania cząsteczek.
 
 Użycie: $0
 
-Do działania skrypt wymaga PDL. Najprościej: apt install pdl
+Do działania skrypt wymaga PDL. Instalacja:
+    apt install pdl
+	ewnetualne: perl -MCPAN -e install PDL
 
 Jarosław Rymut, 2020
 USAGE
@@ -24,7 +28,20 @@ USAGE
 	}
 }
 
-use PDL;
+sub load {
+	my $mod = shift;
+	eval("use $mod");
+	if ($@) {
+		say "Modul $mod jest wymagany!";
+		say "Instalacja:";
+		say "  apt install pdl" if ($mod eq "PDL");
+		say "  perl -MCPAN -e install $mod";
+		exit 1;
+	}
+}
+BEGIN {
+	load('PDL');
+}
 
 use File::Basename;
 use lib dirname (__FILE__);
