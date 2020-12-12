@@ -6,6 +6,7 @@
 
 import math
 import sys
+from time import sleep
 
 def clamp(x, low, high):
     if x < low:
@@ -52,15 +53,14 @@ def advect(b, d, d0, u, v):
             x = clamp(x, 0.5, N + 0.5)
             i0 = math.floor(x)
             i1 = i0 + 1
+            s1 = x - i0 # float part
+            s0 = 1 - s1
 
             y = j - dt0 * v[i, j]
             y = clamp(y, 0.5, N + 0.5)
             j0 = math.floor(y)
             j1 = j0 + 1
-
-            s1 = x - i0
-            s0 = 1 - s1
-            t1 = y - j0
+            t1 = y - j0 # float part
             t0 = 1 - t1
 
             d[i, j] = s0 * (t0 * d0[i0, j0] + t1 * d0[i0, j1]) + \
@@ -76,7 +76,7 @@ def project(u, v, p, div):
 
     p = np.zeros_like(div)
 
-    lin_solve(0, p, div, 1, 6) # TODO: 4 or 6?
+    lin_solve(0, p, div, 1, 4)
 
     u[1:N + 1, :] -= 0.5 * N * (p[2:N + 2, :] - p[0:N, :])
     v[:, 1:N + 1] -= 0.5 * N * (p[:, 2:N + 2] - p[:, 0:N])
@@ -140,13 +140,13 @@ pip install matplotlib
 ''',
         epilog='Jarosław Rymut, 2020'
     )
-    parser.add_argument('--size', metavar='N', type=int, default=10,
+    parser.add_argument('--size', '-s', metavar='N', type=int, default=10,
         help='rozmiar symulacji')
     parser.add_argument('--deltat', '--dt', '-t', metavar='F', type=float, default=0.1, dest='dt',
         help='delta t - zmiana czasu na krok symulacji')
-    parser.add_argument('--diffusion', '--diff', metavar='F', type=float, default=0.001, dest='diff',
+    parser.add_argument('--diffusion', '--diff', '-d', metavar='F', type=float, default=0.001, dest='diff',
         help='współczynnik dyfuzji')
-    parser.add_argument('--viscosity', '--visc', metavar='F', type=float, default=0.000001, dest='visc',
+    parser.add_argument('--viscosity', '--visc', '-v', metavar='F', type=float, default=0.000001, dest='visc',
         help='współczynnik dyfuzji')
     args = parser.parse_args()
 
@@ -156,7 +156,7 @@ pip install matplotlib
 
     N = args.size
     dt = args.dt
-    iterations = 20
+    iterations = 4
 
     diff = args.diff
     visc = args.visc
@@ -171,30 +171,26 @@ pip install matplotlib
     u[2, 2] = 4
     v[2, 2] = 2
     v[2, 3] = 2
-    dens[2, 2] = 30
+    dens[2, 2] = 10
 
     fig = plt.figure()
-    gs = fig.add_gridspec(3, 4)
+    gs = fig.add_gridspec(2, 3)
     ax0 = fig.add_subplot(gs[:, :2])
-    ax1 = fig.add_subplot(gs[0, 3])
-    ax2 = fig.add_subplot(gs[1, 3])
-    ax3 = fig.add_subplot(gs[2, 3])
+    ax1 = fig.add_subplot(gs[0, 2])
+    ax2 = fig.add_subplot(gs[1, 2])
     ax0.axis(xmin=1, xmax=N, ymin=1, ymax=N)
     ax1.axis(xmin=1, xmax=N, ymin=1, ymax=N)
     ax2.axis(xmin=1, xmax=N, ymin=1, ymax=N)
-    ax3.axis(xmin=1, xmax=N, ymin=1, ymax=N)
     ax0.axis('off')
     ax1.axis('off')
     ax2.axis('off')
-    ax3.axis('off')
     ax0.set_title('density')
     ax1.set_title('u')
     ax2.set_title('v')
-    ax3.set_title('density prev')
     g0 = ax0.imshow(dens, interpolation='bilinear', cmap='inferno', animated=True)
     g1 = ax1.imshow(u, interpolation='bilinear', cmap='inferno', animated=True)
     g2 = ax2.imshow(v, interpolation='bilinear', cmap='inferno', animated=True)
-    g3 = ax3.imshow(dens_prev, interpolation='bilinear', cmap='inferno', animated=True)
+    fig.tight_layout()
 
     def animate(frame):
         global u, v, u_prev, v_prev, dens, dens_prev
@@ -207,15 +203,18 @@ pip install matplotlib
         u[2, 2] = 4
         v[2, 2] = 2
         v[2, 3] = 2
-        dens[2, 2] = 30
+        dens[2, 2] = 10
 
         g0.set_array(dens)
         g1.set_array(u)
         g2.set_array(v)
-        g3.set_array(dens_prev)
 
-    x = animation.FuncAnimation(fig, animate, interval=200, blit=False)
-    plt.show()
+    anim = animation.FuncAnimation(fig, animate, interval=32, blit=False)
+    try:
+        plt.show()
+    except RuntimeWarning:
+        anim.save('out.mp4')
+        print('Zapisuję animację do pliku out.mp4')
 else:
     import numpy as np
     import matplotlib.pyplot as plt
