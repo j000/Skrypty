@@ -14,9 +14,9 @@ dzięki czemu przez przypadek nie odsłonimy miny. Gra kończy się po okryciu
 pola z miną bądź po okryciu wszystkich pól bez min.
 
 Obsługa:  
-	ESC, q: wyjście  
-	Enter, f: flaga  
-	Spacja: odsłonięcie  
+  ESC, q: wyjście  
+  Enter, f: flaga  
+  Spacja: odsłonięcie  
 
 Obsługiwane argumenty:  
   -h, --help      wyświetl tą pomoc i wyjdź  
@@ -25,27 +25,37 @@ Obsługiwane argumenty:
 
 ### Perl
 
-Cząsteczki
+Prosta animacja systemu cząsteczkowego.
 
-Symulacja cząsteczek. Docelowo z wizualizacją poza konsolą.
+System czasteczkowy to technika symulowania efektów, które nie mają
+zdefiniowanych brzegów. np. ognia, dymu czy ekspozji. Opiera się
+na odwzorowaniu zachowania wielu małych obiektów.
 
-Do działania wymaga PDL.
+Użycie: ./perl/particles.pl
+
+Do działania skrypt wymaga PDL. Instalacja:  
+  apt install pdl  
+  ewnetualne: perl -MCPAN -e install PDL  
 
 ### Python
 
-Symulacja płynu
+Symulacja płynów
 
-Symulacja płynu oparta o siatkę, zgodnie z opisem:
+Symulacja płynów oparta o siatkę. Program wyświetla animację gęstości płynu.
 https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
 
-Do działania wymaga NumPy i MatPlotLib.
+Do działania program wymaga NumPy i MatPlotLib:  
+  apt-get install python3-matplotlib  
+  albo:  
+  pip install numpy  
+  pip install matplotlib  
 
-Obsługiwane argumenty:  
+Argumenty opcjonalne:  
   -h, --help            pokaż tę wiadomość i wyjdź  
-  --size N              rozmiar symulacji  
+  --size N, -s N        rozmiar siatki symulacji  
   --deltat F, --dt F, -t F  
                         delta t - zmiana czasu na krok symulacji  
-  --diffusion F, --diff F  
+  --diffusion F, --diff F, -d F  
                         współczynnik dyfuzji  
-  --viscosity F, --visc F  
-                        współczynnik dyfuzji  
+  --viscosity F, --visc F, -v F  
+                        współczynnik lepkości cieczy  
