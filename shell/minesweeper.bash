@@ -26,8 +26,10 @@ Obsługa:
 
 Obsługiwane argumenty:
 	-h, --help	wyświetl tą pomoc i wyjdź
-	-s INT		ustawia rozmiar planszy
-	-m INT		ustawia ilość min
+	-s INT		ustawia rozmiar planszy na INT x INT,
+			najmniejszy rozmiar to 2x2, największy: 99x99
+	-m INT		ustawia ilość min - na planszy beędzie prynajmniej jedna mina
+			oraz prynajmniej jedno wolne pole
 
 Jarosław Rymut, 2020
 EOT
@@ -69,7 +71,6 @@ random() {
 		(( tmp >= cutoff ))
 	do :; done
 	(( tmp = tmp % $2 ))
-	# echo $((tmp % $2))
 }
 
 max() {
