@@ -18,10 +18,12 @@ Obsługa:
   Enter, f: flaga  
   Spacja: odsłonięcie  
 
+```
 Obsługiwane argumenty:  
   -h, --help      wyświetl tą pomoc i wyjdź  
   -s INT          ustawia rozmiar planszy  
   -m INT          ustawia ilość min  
+```
 
 ### Perl
 
@@ -33,9 +35,11 @@ na odwzorowaniu zachowania wielu małych obiektów.
 
 Użycie: ./perl/particles.pl
 
+```
 Do działania skrypt wymaga PDL. Instalacja:  
   apt install pdl  
   ewnetualne: perl -MCPAN -e install PDL  
+```
 
 ### Python
 
@@ -50,6 +54,7 @@ Do działania program wymaga NumPy i MatPlotLib:
   pip install numpy  
   pip install matplotlib  
 
+```
 Argumenty opcjonalne:  
   -h, --help            pokaż tę wiadomość i wyjdź  
   --size N, -s N        rozmiar siatki symulacji  
@@ -59,3 +64,4 @@ Argumenty opcjonalne:
                         współczynnik dyfuzji  
   --viscosity F, --visc F, -v F  
                         współczynnik lepkości cieczy  
+```
