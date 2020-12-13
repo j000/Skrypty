@@ -7,6 +7,7 @@
 import math
 import sys
 from time import sleep
+import timeit
 
 def clamp(x, low, high):
     if x < low:
@@ -129,7 +130,7 @@ if __name__ == '__main__':
         description='''
 Symulacja płynów
 
-Symulacja płynów oparta o siatkę.
+Symulacja płynów oparta o siatkę. Program wyświetla animację gęstości płynu.
 https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
 
 Do działania program wymaga NumPy i MatPlotLib:
@@ -141,18 +142,35 @@ pip install matplotlib
         epilog='Jarosław Rymut, 2020'
     )
     parser.add_argument('--size', '-s', metavar='N', type=int, default=10,
-        help='rozmiar symulacji')
+        help='rozmiar siatki symulacji')
     parser.add_argument('--deltat', '--dt', '-t', metavar='F', type=float, default=0.1, dest='dt',
         help='delta t - zmiana czasu na krok symulacji')
     parser.add_argument('--diffusion', '--diff', '-d', metavar='F', type=float, default=0.001, dest='diff',
         help='współczynnik dyfuzji')
     parser.add_argument('--viscosity', '--visc', '-v', metavar='F', type=float, default=0.000001, dest='visc',
-        help='współczynnik dyfuzji')
+        help='współczynnik lepkości cieczy')
     args = parser.parse_args()
 
     import numpy as np
+    import matplotlib
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
+
+
+    backend_found = False
+    print(matplotlib.get_backend())
+    for i in ['Qt5Agg', 'TkAgg', 'Qt5Cairo', 'TkCairo', 'agg', 'MacOSX', 'WxAgg', 'WxCairo', 'Gtk3Agg', 'GTK3Cairo']:
+        try:
+            matplotlib.use(i)
+            backend_found = True
+            break
+        except ImportError:
+            print('nie odnaleziono ' + str(i))
+
+    if not backend_found:
+        print('Skrypt nie działa w srodowisku headless.')
+        parser.print_help()
+        exit(1)
 
     N = args.size
     dt = args.dt
@@ -181,12 +199,12 @@ pip install matplotlib
     ax0.axis(xmin=1, xmax=N, ymin=1, ymax=N)
     ax1.axis(xmin=1, xmax=N, ymin=1, ymax=N)
     ax2.axis(xmin=1, xmax=N, ymin=1, ymax=N)
-    ax0.axis('off')
-    ax1.axis('off')
-    ax2.axis('off')
-    ax0.set_title('density')
-    ax1.set_title('u')
-    ax2.set_title('v')
+    ax0.set_axis_off()
+    ax1.set_axis_off()
+    ax2.set_axis_off()
+    ax0.set_title('gęstość')
+    ax1.set_title('u (prędkość w kierunku pionowym)')
+    ax2.set_title('v (prędkość w kierunku poziomym)')
     g0 = ax0.imshow(dens, interpolation='bilinear', cmap='inferno', animated=True)
     g1 = ax1.imshow(u, interpolation='bilinear', cmap='inferno', animated=True)
     g2 = ax2.imshow(v, interpolation='bilinear', cmap='inferno', animated=True)
@@ -197,24 +215,29 @@ pip install matplotlib
 
         fig.suptitle("Frame " + str(frame))
 
-        vel_step(u, v, u_prev, v_prev, visc)
-        dens_step(dens, dens_prev, u, v, diff)
-
         u[2, 2] = 4
         v[2, 2] = 2
         v[2, 3] = 2
         dens[2, 2] = 10
 
+        vel_step(u, v, u_prev, v_prev, visc)
+        dens_step(dens, dens_prev, u, v, diff)
+
         g0.set_array(dens)
         g1.set_array(u)
         g2.set_array(v)
 
-    anim = animation.FuncAnimation(fig, animate, interval=32, blit=False)
+    anim = animation.FuncAnimation(fig, animate, interval=64, blit=False)
     try:
+        print('Wyświetlam okno')
+        start = timeit.timeit()
         plt.show()
+        end = timeit.timeit()
+        if (end - start < 0.1):
+            print('Matplotlib nie potrafił wyświetlić okna. Sprawdź swoją instalację.')
     except RuntimeWarning:
-        anim.save('out.mp4')
         print('Zapisuję animację do pliku out.mp4')
+        anim.save('out.mp4')
 else:
     import numpy as np
     import matplotlib.pyplot as plt
