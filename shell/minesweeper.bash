@@ -290,10 +290,12 @@ log "Options: $*"
 
 on_exit() {
 	echo -ne '\e[?25h'
+	stty echo
 }
 
 trap on_exit EXIT
 echo -ne '\e[?25l'
+stty -echo
 
 ####################
 
