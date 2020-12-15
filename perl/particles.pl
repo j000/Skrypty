@@ -14,7 +14,11 @@ BEGIN {
 BEGIN {
 	if (@ARGV) {
 		print(<<"USAGE");
-Docelowo prosta animacja zachowania cząsteczek.
+Prosta animacja systemu cząsteczkowego.
+
+System czasteczkowy to technika symulowania efektów, które nie mają
+zdefiniowanych brzegów. np. ognia, dymu czy ekspozji. Opiera się
+na odwzorowaniu zachowania wielu małych obiektów.
 
 Użycie: $0
 
