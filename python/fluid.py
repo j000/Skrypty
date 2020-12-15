@@ -285,9 +285,9 @@ pip install matplotlib
             filename = 'out.mp4'
     if filename != 'disp':
         print('Zapisuję {}-sekundową animację do pliku {}\n'.format(anim_len, filename))
-        anim.save_count = int(anim_len / dt)
+        anim.save_count = max(1, int(anim_len / dt))
         try:
-            anim.save(filename, fps=math.floor(1. / dt))
+            anim.save(filename, fps=max(math.floor(1. / dt), 1))
         except (KeyboardInterrupt, CalledProcessError):
             pass
 
