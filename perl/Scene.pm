@@ -15,13 +15,14 @@ sub new {
 	Carp::confess("Not a renderer")
 		if not $renderer->can("frame")
 			or not $renderer->can("draw");
-	return bless {
+	my $self = {
 		renderer => $renderer,
 		particles => [],
 		emiters => [],
 		forces => [],
-		frame_time => 100,
-	}, $class;
+		dt => 0.1,
+	};
+	return bless $self, $class;
 }
 
 use overload q/""/ => sub {
@@ -51,20 +52,6 @@ sub main_loop {
 		$i++;
 		$renderer->frame();
 
-		while (my ($k, $v) = each @{$self->{particles}}) {
-			for my $f (@{$self->{forces}}) {
-				$v->{acceleration} += $f->apply(
-					$v->{position}->copy,
-					$v->{velocity}->copy
-				);
-			}
-			$v->update($i);
-			$renderer->draw($v);
-			if ($v->isDead()) {
-				splice(@{$self->{particles}}, $k, 1);
-			}
-		}
-
 		for (@{$self->{emiters}}) {
 			my @tmp = $_->emit($i);
 			for (@tmp) {
@@ -72,9 +59,23 @@ sub main_loop {
 			}
 			push @{$self->{particles}}, @tmp;
 		}
+
+		while (my ($k, $p) = each @{$self->{particles}}) {
+			$p->{acceleration} = 0;
+			for my $f (@{$self->{forces}}) {
+				$p->{acceleration} += $f->apply(
+					$self->{dt},
+					$p->{position}->copy,
+					$p->{velocity}->copy
+				);
+			}
+			$p->update($i);
+			$renderer->draw($p);
+			splice(@{$self->{particles}}, $k, 1) if ($p->isDead());
+		}
 		$renderer->done($i);
 		$SIG{INT} = sub { exit 0 };
-		Time::HiRes::usleep(int($self->{frame_time} * 1000));
+		Time::HiRes::usleep(int($self->{dt} * 1_000_000));
 	}
 }
 

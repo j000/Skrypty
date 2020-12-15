@@ -19,7 +19,8 @@ sub new {
 		position => $position,
 		velocity => $velocity,
 		acceleration => zeroes(3),
-		ttl => 30,
+		ttl => 1_000,
+		max_velocity => 2.0,
 	};
 
 	return bless $self, $class;

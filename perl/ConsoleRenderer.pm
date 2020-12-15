@@ -37,15 +37,15 @@ sub draw {
 	my $particle = shift;
 	my $pos = $particle->{position};
 	my $x = int $pos->index(0);
-	my $y = $self->{height} - int $pos->index(2);
+	my $z = $self->{height} - int $pos->index(2);
 	return
 		if ($x < 0 || $x >= $self->{width}
-			|| $y <= 0 || $y >= $self->{height});
+			|| $z <= 0 || $z >= $self->{height});
 	# 16..192 (36)
 	# my $color = 16 + 36 * int(4 * ($particle->{ttl} / 20));
 	# 255 .. 232
 	my $color = int(($particle->{ttl} / 20) * 24 + 232);
-	print "\033[".$y.";".$x."H\e[38;5;".$color."m*";
+	print "\033[".$z.";".$x."H\e[38;5;".$color."m*";
 }
 
 # force destructor on ctrl+c
