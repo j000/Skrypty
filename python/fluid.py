@@ -192,7 +192,7 @@ pip install matplotlib
         metavar='F',
         type=positive_float,
         default=5,
-        help='czas trwania symulacji, jeśli nie jest wyświetlane okno'
+        help='czas trwania symulacji'
     )
     parser.add_argument(
         '--diffusion',
@@ -202,7 +202,7 @@ pip install matplotlib
         type=non_negative_float,
         default=0.001,
         dest='diff',
-        help='współczynnik dyfuzji (domyślnie 0.001)'
+        help='współczynnik dyfuzji (domyślnie 0.001) - odpowiada za "rozlewanie" się wartości na sąsiednie komórki'
     )
     parser.add_argument(
         '--viscosity',
@@ -220,7 +220,7 @@ pip install matplotlib
         nargs='?',
         const='out.mp4',
         dest='filename',
-        help='nazwa pliku do zapisania animacji - gdy nie jest podana wyświetlne zostanie okno'
+        help='nazwa pliku do zapisania animacji, jeśli program nie ma działać w trybie interaktywnym'
     )
     args = parser.parse_args()
 
