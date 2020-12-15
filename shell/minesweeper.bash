@@ -297,8 +297,16 @@ else
 	exec 8>&1
 fi
 
-(( width = $(limit $width 2 99) ))
-(( height = $(limit $height 2 99) ))
+if (( width * 3 + 2 > $(tput cols))); then
+	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala'
+	exit 1
+fi
+if (( height + 2 > $(tput lines))); then
+	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala'
+	exit 1
+fi
+(( width = $(max $width 2) ))
+(( height = $(max $height 2) ))
 (( mines = $(limit $mines 1 $(($width * $height - 1))) ))
 
 log "Size: ${width}x$height"
