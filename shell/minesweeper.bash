@@ -185,31 +185,50 @@ print_cursor() {
 
 reveal() {
 	(( $# != 2 )) && return
-	ind=$1.$2
-	(( revealed[$ind] != 0 )) && return
+	stack=( $1 $2 )
 
-	revealed[$ind]=1
+	while [[ ${#stack[@]} -ne 0 ]]; do
+		x=${stack[0]}
+		y=${stack[1]}
+		stack=( ${stack[@]:2} )
+
+		(( ${revealed[$x.$y]-0} != 0 )) && continue
+
+		reveal_helper $x $y
+		if (( ${map[$x.$y]:=0} == 0 )); then
+			for dy in -1 0 1; do
+				for dx in -1 0 1; do
+					if (( ( dx == 0 && dy == 0 ) ||
+						( $x == 0 && dx == -1 ) ||
+						( $x == width - 1 && dx == 1 ) ||
+						( $y == 0 && dy == -1 ) ||
+						( $y == height - 1 && dy == 1 ) ))
+					then
+						continue
+					fi
+					# add to queue
+					(( new_x = x + dx ))
+					(( new_y = y + dy ))
+					(( ${revealed[$new_x.$new_y]-0} != 0 )) && continue
+					stack+=( $new_x $new_y )
+				done
+			done
+		fi
+	done
+	restore_cursor
+}
+
+reveal_helper() {
+	(( $# != 2 )) && return
+	(( revealed[$1.$2] != 0 )) && return
+
+	revealed[$1.$2]=1
 	(( covered -= 1 ))
 	redraw $1 $2
-	if (( map[$ind] == -1 )); then
+
+	if (( map[$1.$2] == -1 )); then
 		echo "GAME OVER"
 		exit 0
-	fi
-
-	if (( ${map[$ind]:=0} == 0 )); then
-		for dy in -1 0 1; do
-			for dx in -1 0 1; do
-				if (( ( dx == dy ) ||
-					( $1 == 0 && dx == -1 ) ||
-					( $1 == width - 1 && dx == 1 ) ||
-					( $2 == 0 && dy == -1 ) ||
-					( $2 == height - 1 && dy == 1 ) ))
-				then
-					continue
-				fi
-				reveal $(($1 + dx)) $(($2 + dy))
-			done
-		done
 	fi
 }
 
