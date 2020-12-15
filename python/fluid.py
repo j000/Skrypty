@@ -8,6 +8,7 @@ import math
 import sys
 from time import sleep, time
 from subprocess import CalledProcessError
+import mimetypes
 
 def clamp(x, low, high):
     if x < low:
@@ -237,6 +238,12 @@ pip install matplotlib
     anim_len = args.len
     iterations = 4
     filename = args.filename
+
+    if filename:
+        mimetypes.init()
+        mimestart = mimetypes.guess_type(filename)[0]
+        if mimestart == None or mimestart.split('/')[0] != 'video':
+            filename += '.mkv'
 
     diff = args.diff
     visc = args.visc
