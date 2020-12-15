@@ -73,6 +73,7 @@ sub main_loop {
 			push @{$self->{particles}}, @tmp;
 		}
 		$renderer->done($i);
+		$SIG{INT} = sub { exit 0 };
 		Time::HiRes::usleep(int($self->{frame_time} * 1000));
 	}
 }

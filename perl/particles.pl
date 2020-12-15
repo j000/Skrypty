@@ -51,6 +51,9 @@ use ConsoleRenderer;
 use Emitter;
 use Force;
 
+my $console_width = int qx/tput cols/;
+my $console_height = int qx/tput lines/;
+
 my $renderer = new ConsoleRenderer();
 my $scene = new Scene($renderer);
 my $emitter = new Emitter(pdl[0, 1, 0]);

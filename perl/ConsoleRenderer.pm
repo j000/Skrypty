@@ -8,7 +8,10 @@ package ConsoleRenderer;
 
 sub new {
 	my $class = shift;
-	my $self = {};
+	my $self = {
+		'width' => int qx/tput cols/,
+		'height' => int qx/tput lines/,
+	};
 
 	print "\033[?25l";
 	return bless $self, $class;
@@ -16,7 +19,7 @@ sub new {
 
 sub DESTROY {
 	my $self = shift;
-	print "\033[?25h\033[0m";
+	print "\033[?25h\033[2J\033[H\033[0m";
 }
 
 sub frame {
@@ -33,8 +36,11 @@ sub draw {
 	my $self = shift;
 	my $particle = shift;
 	my $pos = $particle->{position};
-	my $x = int($pos->index(0));
-	my $y = int($pos->index(1));
+	my $x = int $pos->index(0);
+	my $y = $self->{height} - int $pos->index(2);
+	return
+		if ($x < 0 || $x >= $self->{width}
+			|| $y <= 0 || $y >= $self->{height});
 	# 16..192 (36)
 	# my $color = 16 + 36 * int(4 * ($particle->{ttl} / 20));
 	# 255 .. 232
