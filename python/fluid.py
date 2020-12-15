@@ -6,8 +6,8 @@
 
 import math
 import sys
-from time import sleep
-import timeit
+from time import sleep, time
+from subprocess import CalledProcessError
 
 def clamp(x, low, high):
     if x < low:
@@ -54,14 +54,14 @@ def advect(b, d, d0, u, v):
             x = clamp(x, 0.5, N + 0.5)
             i0 = math.floor(x)
             i1 = i0 + 1
-            s1 = x - i0 # float part
+            s1 = x - i0  # float part
             s0 = 1 - s1
 
             y = j - dt0 * v[i, j]
             y = clamp(y, 0.5, N + 0.5)
             j0 = math.floor(y)
             j1 = j0 + 1
-            t1 = y - j0 # float part
+            t1 = y - j0  # float part
             t0 = 1 - t1
 
             d[i, j] = s0 * (t0 * d0[i0, j0] + t1 * d0[i0, j1]) + \
@@ -116,7 +116,7 @@ def convertArgparseMessages(s):
     }
     if s in trans:
         return trans[s]
-    print('? >' + s + '<')
+    # print('? >' + s + '<')
     return s
 
 
@@ -141,40 +141,77 @@ pip install matplotlib
 ''',
         epilog='Jarosław Rymut, 2020'
     )
-    parser.add_argument('--size', '-s', metavar='N', type=int, default=10,
-        help='rozmiar siatki symulacji')
-    parser.add_argument('--deltat', '--dt', '-t', metavar='F', type=float, default=0.1, dest='dt',
-        help='delta t - zmiana czasu na krok symulacji')
-    parser.add_argument('--diffusion', '--diff', '-d', metavar='F', type=float, default=0.001, dest='diff',
-        help='współczynnik dyfuzji')
-    parser.add_argument('--viscosity', '--visc', '-v', metavar='F', type=float, default=0.000001, dest='visc',
-        help='współczynnik lepkości cieczy')
+    parser.add_argument(
+        '--size',
+        '-s',
+        metavar='N',
+        type=int,
+        default=10,
+        help='rozmiar siatki symulacji'
+    )
+    parser.add_argument(
+        '--deltat',
+        '--dt',
+        '-t',
+        metavar='F',
+        type=float,
+        default=0.1,
+        dest='dt',
+        help='delta t - zmiana czasu na krok symulacji'
+    )
+    parser.add_argument(
+        '--len',
+        '-l',
+        metavar='F',
+        type=float,
+        default=5,
+        help='czas trwania symulacji, jeśli nie jest wyświetlane okno'
+    )
+    parser.add_argument(
+        '--diffusion',
+        '--diff',
+        '-d',
+        metavar='F',
+        type=float,
+        default=0.001,
+        dest='diff',
+        help='współczynnik dyfuzji (domyślnie 0.001)'
+    )
+    parser.add_argument(
+        '--viscosity',
+        '--visc',
+        '-v',
+        metavar='F',
+        type=float,
+        default=0.0001,
+        dest='visc',
+        help='współczynnik lepkości cieczy (domyślnie 0.0001)'
+    )
+    parser.add_argument(
+        '--save',
+        metavar='filename',
+        nargs='?',
+        default='disp',
+        const='out.mp4',
+        dest='filename',
+        help='nazwa pliku do zapisania animacji - gdy nie jest podana wyświetlne zostanie okno'
+    )
     args = parser.parse_args()
 
-    import numpy as np
-    import matplotlib
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation
-
-
-    backend_found = False
-    print(matplotlib.get_backend())
-    for i in ['Qt5Agg', 'TkAgg', 'Qt5Cairo', 'TkCairo', 'agg', 'MacOSX', 'WxAgg', 'WxCairo', 'Gtk3Agg', 'GTK3Cairo']:
-        try:
-            matplotlib.use(i)
-            backend_found = True
-            break
-        except ImportError:
-            print('nie odnaleziono ' + str(i))
-
-    if not backend_found:
-        print('Skrypt nie działa w srodowisku headless.')
-        parser.print_help()
+    try:
+        import numpy as np
+        import matplotlib
+        import matplotlib.pyplot as plt
+        import matplotlib.animation as animation
+    except ModuleNotFoundError as mnfe:
+        print('Moduł ' + str(mnfe.name) + ' nie został znaleziony, ale jest wymagany. Zapoznaj się z pomocą')
         exit(1)
 
     N = args.size
     dt = args.dt
+    anim_len = args.len
     iterations = 4
+    filename = args.filename
 
     diff = args.diff
     visc = args.visc
@@ -189,25 +226,26 @@ pip install matplotlib
     u[2, 2] = 4
     v[2, 2] = 2
     v[2, 3] = 2
-    dens[2, 2] = 10
+    dens[2, 2] = 1
 
-    fig = plt.figure()
+    fig = plt.figure(dpi=100)
+    fig.set_size_inches(19.2, 10.8)
     gs = fig.add_gridspec(2, 3)
     ax0 = fig.add_subplot(gs[:, :2])
     ax1 = fig.add_subplot(gs[0, 2])
     ax2 = fig.add_subplot(gs[1, 2])
-    ax0.axis(xmin=1, xmax=N, ymin=1, ymax=N)
-    ax1.axis(xmin=1, xmax=N, ymin=1, ymax=N)
-    ax2.axis(xmin=1, xmax=N, ymin=1, ymax=N)
+    ax0.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
+    ax1.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
+    ax2.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
     ax0.set_axis_off()
     ax1.set_axis_off()
     ax2.set_axis_off()
     ax0.set_title('gęstość')
     ax1.set_title('u (prędkość w kierunku pionowym)')
     ax2.set_title('v (prędkość w kierunku poziomym)')
-    g0 = ax0.imshow(dens, interpolation='bilinear', cmap='inferno', animated=True)
-    g1 = ax1.imshow(u, interpolation='bilinear', cmap='inferno', animated=True)
-    g2 = ax2.imshow(v, interpolation='bilinear', cmap='inferno', animated=True)
+    g0 = ax0.imshow(dens, interpolation='bicubic', cmap='Blues_r', animated=True)
+    g1 = ax1.imshow(u, interpolation='bicubic', cmap='Blues_r', animated=True)
+    g2 = ax2.imshow(v, interpolation='bicubic', cmap='Blues_r', animated=True)
     fig.tight_layout()
 
     def animate(frame):
@@ -215,10 +253,10 @@ pip install matplotlib
 
         fig.suptitle("Frame " + str(frame))
 
-        u[2, 2] = 4
-        v[2, 2] = 2
-        v[2, 3] = 2
-        dens[2, 2] = 10
+        u[2, 2] += 4
+        v[2, 2] += 2
+        v[2, 3] += 2
+        dens[2, 2] += 10
 
         vel_step(u, v, u_prev, v_prev, visc)
         dens_step(dens, dens_prev, u, v, diff)
@@ -227,17 +265,32 @@ pip install matplotlib
         g1.set_array(u)
         g2.set_array(v)
 
+        # bo animacja tego nie robi
+        g0.norm.vmax = np.amax(dens[1:N])
+        g0.norm.vmin = np.amin(dens[1:N])
+        g1.norm.vmax = np.amax(u[1:N])
+        g1.norm.vmin = np.amin(u[1:N])
+        g2.norm.vmax = np.amax(v[1:N])
+        g2.norm.vmin = np.amin(v[1:N])
+        if filename != 'disp':
+            print("\033[1AKlatka {} / {} ({:.2f}s / {:.2f}s)".format(frame, int(anim_len / dt), frame * dt, anim_len))
+
     anim = animation.FuncAnimation(fig, animate, interval=64, blit=False)
-    try:
-        print('Wyświetlam okno')
-        start = timeit.timeit()
+    if filename == 'disp':
+        start = time()
         plt.show()
-        end = timeit.timeit()
+        end = time()
         if (end - start < 0.1):
-            print('Matplotlib nie potrafił wyświetlić okna. Sprawdź swoją instalację.')
-    except RuntimeWarning:
-        print('Zapisuję animację do pliku out.mp4')
-        anim.save('out.mp4')
+            print('Matplotlib nie potrafił wyświetlić okna.')
+            filename = 'out.mp4'
+    if filename != 'disp':
+        print('Zapisuję {}-sekundową animację do pliku {}\n'.format(anim_len, filename))
+        anim.save_count = int(anim_len / dt)
+        try:
+            anim.save(filename, fps=math.floor(1. / dt))
+        except (KeyboardInterrupt, CalledProcessError):
+            pass
+
 else:
     import numpy as np
     import matplotlib.pyplot as plt
