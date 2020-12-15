@@ -42,9 +42,8 @@ sub draw {
 		if ($x < 0 || $x >= $self->{width}
 			|| $z <= 0 || $z >= $self->{height});
 	# 16..192 (36)
-	# my $color = 16 + 36 * int(4 * ($particle->{ttl} / 20));
 	# 255 .. 232
-	my $color = int(($particle->{ttl} / 20) * 24 + 232);
+	my $color = int($particle->{ttl} * 24) + 232;
 	print "\033[".$z.";".$x."H\e[38;5;".$color."m*";
 }
 

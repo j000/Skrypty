@@ -19,8 +19,8 @@ sub new {
 		position => $position,
 		velocity => $velocity,
 		acceleration => zeroes(3),
-		ttl => 1_000,
-		max_velocity => 2.0,
+		ttl => 1.0,
+		max_velocity => 1.0,
 	};
 
 	return bless $self, $class;
@@ -37,10 +37,13 @@ sub isDead() {
 
 sub update {
 	my $self = shift;
-	--$self->{ttl};
 
 	$self->{velocity} += $self->{acceleration};
+	if ($self->{velocity} x $self->{velocity}->transpose > $self->{max_velocity} ** 2) {
+		$self->{velocity} = $self->{velocity}->norm * $self->{max_velocity}
+	}
 	$self->{position} += $self->{velocity};
+	$self->{ttl} -= 0.01;
 }
 
 1;
