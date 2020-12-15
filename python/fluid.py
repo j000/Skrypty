@@ -119,6 +119,32 @@ def convertArgparseMessages(s):
     # print('? >' + s + '<')
     return s
 
+def non_negative_float(value):
+    try:
+        fvalue = float(value)
+        if fvalue >= 0:
+            return fvalue
+    except:
+        pass
+    raise argparse.ArgumentTypeError("{:s} nie jest liczbą dodatnią".format(value))
+
+def positive_float(value):
+    try:
+        fvalue = float(value)
+        if fvalue > 0:
+            return fvalue
+    except:
+        pass
+    raise argparse.ArgumentTypeError("{:s} nie jest liczbą nieujemną".format(value))
+
+def positive_int(value):
+    try:
+        fvalue = int(value)
+        if fvalue > 0:
+            return fvalue
+    except:
+        pass
+    raise argparse.ArgumentTypeError("{:s} nie jest liczbą naturalną".format(value))
 
 if __name__ == '__main__':
     import gettext
@@ -145,7 +171,7 @@ pip install matplotlib
         '--size',
         '-s',
         metavar='N',
-        type=int,
+        type=positive_int,
         default=10,
         help='rozmiar siatki symulacji'
     )
@@ -154,7 +180,7 @@ pip install matplotlib
         '--dt',
         '-t',
         metavar='F',
-        type=float,
+        type=positive_float,
         default=0.1,
         dest='dt',
         help='delta t - zmiana czasu na krok symulacji'
@@ -163,7 +189,7 @@ pip install matplotlib
         '--len',
         '-l',
         metavar='F',
-        type=float,
+        type=positive_float,
         default=5,
         help='czas trwania symulacji, jeśli nie jest wyświetlane okno'
     )
@@ -172,7 +198,7 @@ pip install matplotlib
         '--diff',
         '-d',
         metavar='F',
-        type=float,
+        type=non_negative_float,
         default=0.001,
         dest='diff',
         help='współczynnik dyfuzji (domyślnie 0.001)'
@@ -182,16 +208,15 @@ pip install matplotlib
         '--visc',
         '-v',
         metavar='F',
-        type=float,
+        type=non_negative_float,
         default=0.0001,
         dest='visc',
         help='współczynnik lepkości cieczy (domyślnie 0.0001)'
     )
     parser.add_argument(
         '--save',
-        metavar='filename',
+        metavar='FILE',
         nargs='?',
-        default='disp',
         const='out.mp4',
         dest='filename',
         help='nazwa pliku do zapisania animacji - gdy nie jest podana wyświetlne zostanie okno'
@@ -241,11 +266,11 @@ pip install matplotlib
     ax1.set_axis_off()
     ax2.set_axis_off()
     ax0.set_title('gęstość')
-    ax1.set_title('u (prędkość w kierunku pionowym)')
-    ax2.set_title('v (prędkość w kierunku poziomym)')
-    g0 = ax0.imshow(dens, interpolation='bicubic', cmap='Blues_r', animated=True)
-    g1 = ax1.imshow(u, interpolation='bicubic', cmap='Blues_r', animated=True)
-    g2 = ax2.imshow(v, interpolation='bicubic', cmap='Blues_r', animated=True)
+    ax1.set_title('wartość prędkości w kierunku pionowym')
+    ax2.set_title('wartość prędkości w kierunku poziomym')
+    g0 = ax0.imshow(dens, interpolation='bicubic', cmap='cividis', animated=True)
+    g1 = ax1.imshow(u, interpolation='bicubic', cmap='plasma', animated=True)
+    g2 = ax2.imshow(v, interpolation='bicubic', cmap='plasma', animated=True)
     fig.tight_layout()
 
     def animate(frame):
@@ -272,18 +297,18 @@ pip install matplotlib
         g1.norm.vmin = np.amin(u[1:N])
         g2.norm.vmax = np.amax(v[1:N])
         g2.norm.vmin = np.amin(v[1:N])
-        if filename != 'disp':
+        if filename:
             print("\033[1AKlatka {} / {} ({:.2f}s / {:.2f}s)".format(frame, int(anim_len / dt), frame * dt, anim_len))
 
     anim = animation.FuncAnimation(fig, animate, interval=64, blit=False)
-    if filename == 'disp':
+    if filename is None:
         start = time()
         plt.show()
         end = time()
         if (end - start < 0.1):
             print('Matplotlib nie potrafił wyświetlić okna.')
             filename = 'out.mp4'
-    if filename != 'disp':
+    if filename:
         print('Zapisuję {}-sekundową animację do pliku {}\n'.format(anim_len, filename))
         anim.save_count = max(1, int(anim_len / dt))
         try:
