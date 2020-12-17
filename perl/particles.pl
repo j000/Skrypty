@@ -18,13 +18,16 @@ Prosta animacja systemu cząsteczkowego.
 
 System czasteczkowy to technika symulowania efektów, które nie mają
 zdefiniowanych brzegów. np. ognia, dymu czy ekspozji. Opiera się
-na odwzorowaniu zachowania wielu małych obiektów.
+na odwzorowaniu zachowania wielu małych obiektów, zamiast symulacji całego
+zjawiska.
 
 Użycie: $0
 
+Symulację można przerwać przez naciśnięcie klawiszy Ctrl+c.
+
 Do działania skrypt wymaga PDL. Instalacja:
     apt install pdl
-	ewnetualne: perl -MCPAN -e install PDL
+    ewnetualne: perl -MCPAN -e install PDL
 
 Jarosław Rymut, 2020
 USAGE
