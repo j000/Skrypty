@@ -7,8 +7,6 @@
 import math
 import sys
 from time import sleep, time
-from subprocess import CalledProcessError
-import mimetypes
 
 def clamp(x, low, high):
     if x < low:
@@ -112,8 +110,14 @@ def convertArgparseMessages(s):
         'unrecognized arguments: %s': 'nierozpoznane argumenty: %s',
         '%(prog)s: error: %(message)s\n': '%(prog)s: błąd: %(message)s\n',
         'expected one argument': 'wymagany argument',
-        'expected at most one argument': 'wymagany nie więcej niż jeden argument',
-        'expected at least one argument': 'wymagany przynajmniej jeden argument',
+        'expected at most one argument':
+            'wymagany nie więcej niż jeden argument',
+        'expected at least one argument':
+            'wymagany przynajmniej jeden argument',
+        'invalid %(type)s value: %(value)r':
+            'niepoprawna wartość %(type)s: %(value)r',
+        'can\'t open \'%(filename)s\': %(error)s':
+            'nie można otworzyć \'%(filename)s\': %(error)s',
     }
     if s in trans:
         return trans[s]
@@ -127,7 +131,9 @@ def non_negative_float(value):
             return fvalue
     except:
         pass
-    raise argparse.ArgumentTypeError("{:s} nie jest liczbą dodatnią".format(value))
+    raise argparse.ArgumentTypeError(
+        "{:s} nie jest liczbą dodatnią".format(value)
+    )
 
 def positive_float(value):
     try:
@@ -136,7 +142,9 @@ def positive_float(value):
             return fvalue
     except:
         pass
-    raise argparse.ArgumentTypeError("{:s} nie jest liczbą nieujemną".format(value))
+    raise argparse.ArgumentTypeError(
+        "{:s} nie jest liczbą nieujemną".format(value)
+    )
 
 def positive_int(value):
     try:
@@ -145,7 +153,9 @@ def positive_int(value):
             return fvalue
     except:
         pass
-    raise argparse.ArgumentTypeError("{:s} nie jest liczbą naturalną".format(value))
+    raise argparse.ArgumentTypeError(
+        "{:s} nie jest liczbą naturalną".format(value)
+    )
 
 if __name__ == '__main__':
     import gettext
@@ -202,7 +212,8 @@ pip install matplotlib
         type=non_negative_float,
         default=0.001,
         dest='diff',
-        help='współczynnik dyfuzji (domyślnie 0.001) - odpowiada za "rozlewanie" się wartości na sąsiednie komórki'
+        help='współczynnik dyfuzji (domyślnie 0.001) - odpowiada \
+            za "rozlewanie" się wartości na sąsiednie komórki'
     )
     parser.add_argument(
         '--viscosity',
@@ -220,7 +231,8 @@ pip install matplotlib
         nargs='?',
         const='out.mp4',
         dest='filename',
-        help='nazwa pliku do zapisania animacji, jeśli program nie ma działać w trybie interaktywnym'
+        help='nazwa pliku do zapisania animacji, jeśli program nie ma działać \
+            w trybie interaktywnym'
     )
     args = parser.parse_args()
 
@@ -230,7 +242,8 @@ pip install matplotlib
         import matplotlib.pyplot as plt
         import matplotlib.animation as animation
     except ModuleNotFoundError as mnfe:
-        print('Moduł ' + str(mnfe.name) + ' nie został znaleziony, ale jest wymagany. Zapoznaj się z pomocą')
+        print('Moduł ' + str(mnfe.name) + ' nie został znaleziony, ' +
+            'ale jest wymagany. Zapoznaj się z pomocą')
         exit(1)
 
     N = args.size
@@ -240,6 +253,7 @@ pip install matplotlib
     filename = args.filename
 
     if filename:
+        import mimetypes
         mimetypes.init()
         mimestart = mimetypes.guess_type(filename)[0]
         if mimestart == None or mimestart.split('/')[0] != 'video':
@@ -305,7 +319,9 @@ pip install matplotlib
         g2.norm.vmax = np.amax(v[1:N])
         g2.norm.vmin = np.amin(v[1:N])
         if filename:
-            print("\033[1AKlatka {} / {} ({:.2f}s / {:.2f}s)".format(frame, int(anim_len / dt), frame * dt, anim_len))
+            print("\033[1AKlatka {} / {} ({:.2f}s / {:.2f}s)".format(
+                frame, int(anim_len / dt), frame * dt, anim_len
+            ))
 
     anim = animation.FuncAnimation(fig, animate, interval=64, blit=False)
     if filename is None:
@@ -316,7 +332,10 @@ pip install matplotlib
             print('Matplotlib nie potrafił wyświetlić okna.')
             filename = 'out.mp4'
     if filename:
-        print('Zapisuję {}-sekundową animację do pliku {}\n'.format(anim_len, filename))
+        from subprocess import CalledProcessError
+        print('Zapisuję {}-sekundową animację do pliku {}\n'.format(
+            anim_len, filename
+        ))
         anim.save_count = max(1, int(anim_len / dt))
         try:
             anim.save(filename, fps=max(math.floor(1. / dt), 1))
