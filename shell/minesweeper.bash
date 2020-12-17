@@ -20,16 +20,17 @@ dzięki czemu przez przypadek nie odsłonimy miny. Gra kończy się po okryciu
 pola z miną bądź po okryciu wszystkich pól bez min.
 
 Obsługa:
-	ESC, q: wyjście
-	Enter, f: flaga
-	Spacja: odsłonięcie
+    ESC, q: wyjście
+    Enter, f: flaga
+    Spacja: odsłonięcie
 
 Obsługiwane argumenty:
-	-h, --help	wyświetl tą pomoc i wyjdź
-	-s INT		ustawia rozmiar planszy na INT x INT,
-			najmniejszy rozmiar to 2x2, największy: 99x99
-	-m INT		ustawia ilość min - na planszy beędzie prynajmniej jedna mina
-			oraz prynajmniej jedno wolne pole
+    -h, --help  wyświetl tą pomoc i wyjdź
+    -s INT      ustawia rozmiar planszy na INT x INT,
+                najmniejszy rozmiar to 2x2, największy - zależy od rozmiaru
+                terminala
+    -m INT      ustawia ilość min - na planszy musi znajdować się
+                przynajmniej jedna mina oraz przynajmniej jedno wolne pole
 
 Jarosław Rymut, 2020
 EOT
@@ -37,14 +38,12 @@ EOT
 
 invalid_option() {
 	echo "Niepoprawny argument: $1"
-	echo
 	usage
 	exit 1
 }
 
 missing_argument() {
 	echo "$1 wymaga podania wartości"
-	echo
 	usage
 	exit 1
 }
@@ -298,20 +297,25 @@ else
 fi
 
 if (( width * 3 + 2 > $(tput cols))); then
-	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala'
-	exit 1
+	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala, poprawiam'
+	(( width = ($(tput cols) - 2) / 3 ))
+fi
+if (( width < 2 || height < 2 )); then
+	echo 'Plansza musi mieć przynajmniej jedno wolne pole i przynajmniej jedną minę, poprawiam.'
+	(( width = 2 ))
+	(( height = 2 ))
 fi
 if (( height + 2 > $(tput lines))); then
-	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala'
-	exit 1
+	echo 'Podany rozmiar planszy jest za duży na bieżące okno terminala, poprawiam'
+	(( height = $(tput lines) - 2 ))
 fi
-(( width = $(max $width 2) ))
-(( height = $(max $height 2) ))
-(( mines = $(limit $mines 1 $(($width * $height - 1))) ))
-
-log "Size: ${width}x$height"
-log "Mines: $mines"
-log "Options: $*"
+if (( mines < 1 )); then
+	echo 'Na planszy musi znajdować się przynajmniej jedna mina, poprawiam.'
+	(( mines = 1 ))
+elif (( mines > width * height - 1 )); then
+	echo 'Na planszy musi znajdować się przynajmniej jedno wolne pole, poprawiam.'
+	(( mines = width * height - 1 ))
+fi
 
 ####################
 
