@@ -8,6 +8,14 @@ import math
 import sys
 from time import sleep, time
 
+N = 10
+dt = 0.1
+anim_len = 5
+iterations = 4
+diff = 0.001
+visc = 0.0001
+filename = 'out.mkv'
+
 def clamp(x, low, high):
     if x < low:
         return low
@@ -69,8 +77,9 @@ def advect(b, d, d0, u, v):
 
 
 def project(u, v, p, div):
-    div[1:N + 1, 1:N + 1] = -0.5 / N * (
-        u[2:N + 2, 1:N + 1] - u[0:N, 1:N + 1] + v[1:N + 1, 2:N + 2] - v[1:N + 1, 0:N]
+    div[1:-1, 1:-1] = -0.5 / N * (
+            u[2:, 1:-1] - u[:-2, 1:-1]
+            + v[1:-1, 2:] - v[1:-1, :-2]
     )
     set_bound(0, div)
 
@@ -78,8 +87,8 @@ def project(u, v, p, div):
 
     lin_solve(0, p, div, 1, 4)
 
-    u[1:N + 1, :] -= 0.5 * N * (p[2:N + 2, :] - p[0:N, :])
-    v[:, 1:N + 1] -= 0.5 * N * (p[:, 2:N + 2] - p[:, 0:N])
+    u[1:-1, :] -= 0.5 * N * (p[2:, :] - p[:-2, :])
+    v[:, 1:-1] -= 0.5 * N * (p[:, 2:] - p[:, :-2])
     set_bound(1, u)
     set_bound(2, v)
 
@@ -124,6 +133,7 @@ def convertArgparseMessages(s):
     # print('? >' + s + '<')
     return s
 
+
 def non_negative_float(value):
     try:
         fvalue = float(value)
@@ -134,6 +144,7 @@ def non_negative_float(value):
     raise argparse.ArgumentTypeError(
         "{:s} nie jest liczbą dodatnią".format(value)
     )
+
 
 def positive_float(value):
     try:
@@ -146,6 +157,7 @@ def positive_float(value):
         "{:s} nie jest liczbą nieujemną".format(value)
     )
 
+
 def positive_int(value):
     try:
         fvalue = int(value)
@@ -157,6 +169,14 @@ def positive_int(value):
         "{:s} nie jest liczbą naturalną".format(value)
     )
 
+
+def environment():
+    u[2, 2] += 4
+    v[2, 2] += 2
+    v[2, 3] += 2
+    dens[2, 2] += 10
+
+
 if __name__ == '__main__':
     import gettext
     gettext.gettext = convertArgparseMessages
@@ -167,8 +187,12 @@ if __name__ == '__main__':
         description='''
 Symulacja płynów
 
-Symulacja płynów oparta o siatkę. Program wyświetla animację gęstości płynu.
+Symulacja płynów oparta o siatkę. Program wyświetla animację gęstości płynu
+oraz prędkości w kierunku poziomym i pionowym.
 https://web.archive.org/web/20190212194042if_/http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
+
+Program spróbuje wyświetlić okno i prowadzi symulację bez końca. Animację można
+zapisać do pliku wykorzystując opcję --save.
 
 Do działania program wymaga NumPy i MatPlotLib:
 apt-get install python3-matplotlib
@@ -183,8 +207,8 @@ pip install matplotlib
         '-s',
         metavar='N',
         type=positive_int,
-        default=10,
-        help='rozmiar siatki symulacji'
+        default=N,
+        help='rozmiar siatki symulacji (domyślnie '+str(N)+')'
     )
     parser.add_argument(
         '--deltat',
@@ -192,17 +216,9 @@ pip install matplotlib
         '-t',
         metavar='F',
         type=positive_float,
-        default=0.1,
+        default=dt,
         dest='dt',
-        help='delta t - zmiana czasu na krok symulacji'
-    )
-    parser.add_argument(
-        '--len',
-        '-l',
-        metavar='F',
-        type=positive_float,
-        default=5,
-        help='czas trwania symulacji'
+        help='delta t - zmiana czasu na krok symulacji (domyslnie '+str(dt)+')'
     )
     parser.add_argument(
         '--diffusion',
@@ -210,9 +226,9 @@ pip install matplotlib
         '-d',
         metavar='F',
         type=non_negative_float,
-        default=0.001,
+        default=diff,
         dest='diff',
-        help='współczynnik dyfuzji (domyślnie 0.001) - odpowiada \
+        help='współczynnik dyfuzji (domyślnie '+str(diff)+') - odpowiada \
             za "rozlewanie" się wartości na sąsiednie komórki'
     )
     parser.add_argument(
@@ -221,18 +237,26 @@ pip install matplotlib
         '-v',
         metavar='F',
         type=non_negative_float,
-        default=0.0001,
+        default=visc,
         dest='visc',
-        help='współczynnik lepkości cieczy (domyślnie 0.0001)'
+        help='współczynnik lepkości cieczy (domyślnie '+str(visc)+')'
     )
     parser.add_argument(
         '--save',
         metavar='FILE',
         nargs='?',
-        const='out.mp4',
+        const=filename,
         dest='filename',
         help='nazwa pliku do zapisania animacji, jeśli program nie ma działać \
             w trybie interaktywnym'
+    )
+    parser.add_argument(
+        '--len',
+        '-l',
+        metavar='F',
+        type=positive_float,
+        default=anim_len,
+        help='czas trwania symulacji - przy zapisie do pliku'
     )
     args = parser.parse_args()
 
@@ -249,7 +273,6 @@ pip install matplotlib
     N = args.size
     dt = args.dt
     anim_len = args.len
-    iterations = 4
     filename = args.filename
 
     if filename:
@@ -269,29 +292,26 @@ pip install matplotlib
     dens = np.zeros((N + 2, N + 2))
     dens_prev = np.zeros((N + 2, N + 2))
 
-    u[2, 2] = 4
-    v[2, 2] = 2
-    v[2, 3] = 2
-    dens[2, 2] = 1
+    environment()
 
     fig = plt.figure(dpi=100)
     fig.set_size_inches(19.2, 10.8)
-    gs = fig.add_gridspec(2, 3)
+    gs = fig.add_gridspec(2, 5)
     ax0 = fig.add_subplot(gs[:, :2])
     ax1 = fig.add_subplot(gs[0, 2])
     ax2 = fig.add_subplot(gs[1, 2])
-    ax0.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
-    ax1.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
-    ax2.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
-    ax0.set_axis_off()
-    ax1.set_axis_off()
-    ax2.set_axis_off()
+    ax3 = fig.add_subplot(gs[:, 3:])
+    for i in (ax0, ax1, ax2, ax3):
+        i.axis(xmin=0.5, xmax=N + 0.5, ymin=0.5, ymax=N + 0.5)
+        i.set_axis_off()
     ax0.set_title('gęstość')
     ax1.set_title('wartość prędkości w kierunku pionowym')
     ax2.set_title('wartość prędkości w kierunku poziomym')
+    ax3.set_title('wartość prędkości')
     g0 = ax0.imshow(dens, interpolation='bicubic', cmap='cividis', animated=True)
-    g1 = ax1.imshow(u, interpolation='bicubic', cmap='plasma', animated=True)
-    g2 = ax2.imshow(v, interpolation='bicubic', cmap='plasma', animated=True)
+    g1 = ax1.imshow(u[1:-1, 1:-1], interpolation='bicubic', cmap='plasma', animated=True)
+    g2 = ax2.imshow(v[1:-1, 1:-1], interpolation='bicubic', cmap='plasma', animated=True)
+    g3 = ax3.quiver(u[1:-1, 1:-1], v[1:-1, 1:-1], animated=True, scale=5, angles='xy', pivot='mid')
     fig.tight_layout()
 
     def animate(frame):
@@ -299,25 +319,23 @@ pip install matplotlib
 
         fig.suptitle("Frame " + str(frame))
 
-        u[2, 2] += 4
-        v[2, 2] += 2
-        v[2, 3] += 2
-        dens[2, 2] += 10
+        environment()
 
         vel_step(u, v, u_prev, v_prev, visc)
         dens_step(dens, dens_prev, u, v, diff)
 
         g0.set_array(dens)
-        g1.set_array(u)
-        g2.set_array(v)
+        g1.set_array(u[1:-1, 1:-1])
+        g2.set_array(v[1:-1, 1:-1])
+        g3.set_UVC(u[1:-1, 1:-1], v[1:-1, 1:-1])
 
         # bo animacja tego nie robi
-        g0.norm.vmax = np.amax(dens[1:N])
-        g0.norm.vmin = np.amin(dens[1:N])
-        g1.norm.vmax = np.amax(u[1:N])
-        g1.norm.vmin = np.amin(u[1:N])
-        g2.norm.vmax = np.amax(v[1:N])
-        g2.norm.vmin = np.amin(v[1:N])
+        g0.norm.vmax = np.amax(dens[1:-1, 1:-1])
+        g0.norm.vmin = np.amin(dens[1:-1, 1:-1])
+        g1.norm.vmax = np.amax(u[1:-1, 1:-1])
+        g1.norm.vmin = np.amin(u[1:-1, 1:-1])
+        g2.norm.vmax = np.amax(v[1:-1, 1:-1])
+        g2.norm.vmin = np.amin(v[1:-1, 1:-1])
         if filename:
             print("\033[1AKlatka {} / {} ({:.2f}s / {:.2f}s)".format(
                 frame, int(anim_len / dt), frame * dt, anim_len
@@ -330,7 +348,7 @@ pip install matplotlib
         end = time()
         if (end - start < 0.1):
             print('Matplotlib nie potrafił wyświetlić okna.')
-            filename = 'out.mp4'
+            filename = 'out.mkv'
     if filename:
         from subprocess import CalledProcessError
         print('Zapisuję {}-sekundową animację do pliku {}\n'.format(
