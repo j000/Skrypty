@@ -23,7 +23,8 @@ zjawiska.
 
 Użycie: $0
 
-Symulację można przerwać przez naciśnięcie klawiszy Ctrl+c.
+Symulacja nie ma końca, działanie programu można przerwać przez naciśnięcie
+klawiszy Ctrl+c.
 
 Do działania skrypt wymaga PDL. Instalacja:
     apt install pdl
